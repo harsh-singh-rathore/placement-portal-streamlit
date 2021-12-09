@@ -1,0 +1,16 @@
+delimiter //
+create trigger cgpa_check
+before insert on job
+for each row
+begin
+if new.cgpa > 9.9 then
+signal sqlstate '20000' set message_text = 'CGPA too high. Expected value 5-9.9';
+elseif new.cgpa < 5 then
+signal sqlstate '20000' set message_text = 'CGPA too low. Expected value 5-9.9';
+end if;
+end;
+//
+
+//
+
+//
