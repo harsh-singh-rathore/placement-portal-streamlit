@@ -18,11 +18,6 @@ mydb = mysql.connector.connect(
     )
 
 mycursor = mydb.cursor()
-# mycursor.execute("show tables")
-# res = mycursor.fetchall();
-# for i in res:
-#     print(i[0])
-
 
 def verify_user(username: str, password: str):
     '''
@@ -102,6 +97,20 @@ def delete_company(id: int):
     except Exception as e:
         print(e)
         return False
+def get_branch():
+    mycursor.execute("select * from branch")
+    branches = [str(i[0])+' '+i[1] for i in mycursor.fetchall()]
+    return branches
+    
+def insert_student(reg_no: int, name: str, email: str, password: str, branch_id: int, cgpa: float, semester: int, backlog: int, mob:str):
+    try:
+        mycursor.execute(f"call ins_stud({reg_no}, '{name}', '{email}', '{password}', {branch_id}, {cgpa}, {semester}, {backlog}, '{mob}')")
+        mydb.commit()
+        return True
+    except Exception as e:
+        print(e)
+        return False
+    
 
 def placed_where(reg_id: int):
     mycursor.execute(f"select company.name, selection.job_id, job.role from selection, company, job where selection.reg_no = {reg_id} and job.job_id = selection.job_id and job.comp_id = company.comp_id")
@@ -162,7 +171,7 @@ def apply_to_job(job_id: int, reg_no: int):
             mycursor.execute(f"insert into selection values({job_id}, {reg_no})")
             mydb.commit()
             return True
-        except:
+        except Exception as e:
             print("ERROR: Can't apply to this job")
             return False
     else:

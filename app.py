@@ -1,5 +1,6 @@
+from logging import error
 import streamlit as st
-from queries.queries import apply_to_job, delete_job, show_selections, verify_user, get_name, get_all_companies, get_elligible_companies, get_reg_no, is_placed, placed_where, get_all_just_companies, insert_company, delete_company, get_comp_id, insert_job, delete_job, show_selections, get_selection
+from queries.queries import apply_to_job, delete_job, show_selections, verify_user, get_name, get_all_companies, get_elligible_companies, get_reg_no, is_placed, placed_where, get_all_just_companies, insert_company, delete_company, get_comp_id, insert_job, delete_job, show_selections, get_selection, get_branch, insert_student
 
 ADMIN_PW = 'admin'
 
@@ -15,10 +16,18 @@ def main():
     if choice == 'home':
         
         st.markdown('''
-        <h1> HOME </h1>
-        + This is the placement portal for the students of MIT and they can use this to apply for companies and see if they are shortlisted
-        + The app is based on Streamlit which is a python framework and MySql for database
-        ''', unsafe_allow_html=True)
+        # HOME
+        We propose a solution with 6 tables namely
+        + job (details about the jobs)
+        + branch (all the branches in the university)
+        + students (details of the students applying)
+        + company (details of the companies)
+        + job_branch (details on which branch is eligible for which job)
+        + selection (students placed)
+        
+
+        The students login with the student portal and the admin fills in the company details, the job details of the registered companies, and the eligibility criteria. After the job is posted, the students can check the jobs for which they are eligible and apply to the same. The tables are updated automatically according to the information passed by the companies and selected students are added to the selected tables.
+        ''')
     if choice == 'login':
         st.subheader('LOGIN')
         username = st.sidebar.text_input("Username")
@@ -96,8 +105,28 @@ def main():
                             st.success("Deleted Job")
                         else:
                             st.error("Error Deleting Job")
-
-
+                
+                st.markdown('''
+                ## Student
+                ''')
+                s1, s2, s3 = st.columns(3)
+                with s1:
+                    sreg_no = st.text_input("Registration Number")
+                    spassword = st.text_input('Student Password', type='password')
+                    semester = st.selectbox('Semester', [1, 2, 3, 4, 5, 6, 7, 8])
+                with s2:
+                    sname = st.text_input("Name")
+                    sbranch_id = st.selectbox('Branch', get_branch())
+                    sbacklog = st.checkbox("Student Backlog")
+                with s3:
+                    semail = st.text_input("Student Email")
+                    scgpa = st.text_input("Student CGPA")
+                    smob_number = st.text_input("Mobile Number")
+                if st.button("Insert Student"):
+                    if insert_student(sreg_no, sname, semail, spassword, int(sbranch_id.split(' ')[0]), float(scgpa), int(semester), sbacklog, smob_number):                   
+                        st.success("Inserted Student")
+                    else:
+                        st.error("ERROR: Couldn't insert Student!")
 
                 
             elif(not verify_user(username, password)):
@@ -150,6 +179,16 @@ def main():
 
     if choice == 'about us':
         st.subheader('About Us')
+        st.markdown('''
+        Harsh Rathod - 190911288
+        
+        Kaustav Sarkar - 190911218
+        
+        Ayush Goyal - 190911298
+        
+        MANIPAL INSTITUTE OF TECHNOLOGY
+        
+        DEPARTMENT OF ICT''')
                 
 
 if __name__=="__main__":

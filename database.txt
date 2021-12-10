@@ -1,0 +1,85 @@
+CREATE TABLE branch(
+    branch_id int,
+    name varchar(256) not null,
+    PRIMARY KEY (branch_id)
+);
+//Inserts
+
+CREATE TABLE company(
+    comp_id int,
+    name varchar(256),
+    contact_info varchar(256),
+    PRIMARY KEY (comp_id)
+);
+
+CREATE TABLE job(
+    job_id int,
+    comp_id int,
+    title varchar(256),
+    role varchar(256),
+    ctc int,
+    cgpa float,
+    type enum('PI','P','I','SI'),
+    backlog int,
+    location varchar(256),
+    PRIMARY KEY (job_id),
+    FOREIGN KEY (comp_id) REFERENCES company(comp_id) on delete cascade
+);
+//Inserts
+
+CREATE TABLE student(
+    reg_no int,
+    name varchar(256),
+    email varchar(256),
+    password varchar(256),
+    branch_id int,
+    cgpa float,
+    semester int,
+    backlog int,
+    mob varchar(20),
+    PRIMARY KEY (reg_no),
+    FOREIGN KEY (branch_id) REFERENCES branch(branch_id) on delete cascade
+);
+//Inserts
+
+CREATE TABLE selection(
+    job_id int,
+    reg_no int,
+    FOREIGN KEY (job_id) references job(job_id) on delete cascade,
+    FOREIGN KEY (reg_no) references student(reg_no) on delete cascade,
+    PRIMARY KEY(job_id, reg_no)
+);
+//Inserts
+
+CREATE TABLE job_branch(
+    job_id int,
+    branch_id int,
+    FOREIGN KEY (job_id) REFERENCES job(job_id) on delete cascade,
+    FOREIGN KEY (branch_id) REFERENCES branch(branch_id) on delete cascade,
+    PRIMARY KEY(job_id, branch_id)
+);
+//Inserts
+
+//trigger
+delimiter //
+create trigger cgpa_check
+before insert on job
+for each row
+begin
+if new.cgpa > 9.9 then
+signal sqlstate '20000' set message_text = 'CGPA too high. Expected value 5-9.9';
+elseif new.cgpa < 5 then
+signal sqlstate '20000' set message_text = 'CGPA too low. Expected value 5-9.9';
+end if;
+end;
+//
+
+//procedure
+delimiter //
+create procedure ins_stud(IN v_reg_no int, IN v_name varchar(256), IN v_email varchar(256), IN v_password varchar(256), IN v_branchid int, IN v_cgpa float, IN v_semester int, IN v_backlog int, IN v_mob varchar(20))
+begin
+INSERT INTO student (reg_no, name, email, password, branch_id, cgpa, semester, backlog, mob) VALUES (v_reg_no, v_name, v_email, v_password, v_branchid, v_cgpa, v_semester, v_backlog, v_mob);
+end;
+//
+
+call ins_stud()
